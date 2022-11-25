@@ -2,17 +2,17 @@
   <div style="margin-top: 16px">
     <el-form-item label="处理用户">
       <el-select v-model="userTaskForm.assignee" @change="updateElementTask('assignee')">
-        <el-option v-for="ak in mockData" :key="'ass-' + ak" :label="`用户${ak}`" :value="`user${ak}`" />
+        <el-option v-for="item in selectAssigneeList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
     <el-form-item label="候选用户">
       <el-select v-model="userTaskForm.candidateUsers" multiple collapse-tags @change="updateElementTask('candidateUsers')">
-        <el-option v-for="uk in mockData" :key="'user-' + uk" :label="`用户${uk}`" :value="`user${uk}`" />
+        <el-option v-for="item in selectCandidateUserList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
     <el-form-item label="候选分组">
       <el-select v-model="userTaskForm.candidateGroups" multiple collapse-tags @change="updateElementTask('candidateGroups')">
-        <el-option v-for="gk in mockData" :key="'ass-' + gk" :label="`分组${gk}`" :value="`group${gk}`" />
+        <el-option v-for="item in selectCandidateGroupsList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
     <el-form-item label="到期时间">
@@ -45,7 +45,9 @@ export default {
         priority: ""
       },
       userTaskForm: {},
-      mockData: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      selectAssigneeList: [],
+      selectCandidateUserList: [],
+      selectCandidateGroupsList: [],
     };
   },
   watch: {
@@ -56,6 +58,9 @@ export default {
         this.$nextTick(() => this.resetTaskForm());
       }
     }
+  },
+  created() {
+    FUN_UTILS.initUserTask(this);
   },
   methods: {
     resetTaskForm() {

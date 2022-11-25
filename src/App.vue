@@ -150,6 +150,15 @@ export default {
   },
   created() {},
   methods: {
+    getUrlParams(url) {
+      const paramArr = url.slice(url.indexOf("?") + 1).split("&");
+      const params = {};
+      paramArr.map((param) => {
+        const [key, val] = param.split("=");
+        params[key] = decodeURIComponent(val);
+      });
+      return params;
+    },
     initModeler(modeler) {
       setTimeout(() => {
         this.modeler = modeler;
@@ -158,7 +167,15 @@ export default {
         const rootElement = canvas.getRootElement();
         Log.prettyPrimary("Process Id:", rootElement.id);
         Log.prettyPrimary("Process Name:", rootElement.businessObject.name);
-      }, 10);
+
+        let params = this.getUrlParams(window.location.href);
+        if(params && params.enBpmnStr){
+          let xmlStr = decodeURIComponent(params.enBpmnStr);
+          modeler.importXML(xmlStr);
+        }
+        FUN_UTILS.bpmnModeler = modeler;
+        top.window && top.window.TOP_FUN_UTILS && top.window.TOP_FUN_UTILS.bpmnDesInit();
+      }, 100);
     },
     reloadProcessDesigner(notDeep) {
       this.controlForm.additionalModel = [];
