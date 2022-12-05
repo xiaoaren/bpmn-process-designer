@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <my-process-palette />
+    <!-- <my-process-palette /> -->
     <my-process-designer
       :key="`designer-${reloadIndex}`"
       :options="{
@@ -173,7 +173,7 @@ export default {
           let xmlStr = decodeURIComponent(params.enBpmnStr);
           modeler.importXML(xmlStr);
         }
-        FUN_UTILS.bpmnModeler = modeler;
+        window.FUN_UTILS.bpmnModeler = modeler;
         top.window && top.window.TOP_FUN_UTILS && top.window.TOP_FUN_UTILS.bpmnDesInit();
       }, 100);
     },
@@ -237,7 +237,8 @@ body {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  display: inline-grid;
+  // display: inline-grid;
+  display: flex;
   grid-template-columns: 100px auto max-content;
 }
 .demo-info-bar {
