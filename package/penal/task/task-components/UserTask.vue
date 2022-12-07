@@ -1,7 +1,7 @@
 <template>
   <div style="margin-top: 16px">
     <el-form-item label="处理用户">
-      <el-select v-model="userTaskForm.assignee" @change="updateElementTask('assignee')">
+      <el-select v-model="userTaskForm.assignee" filterable remote reserve-keyword :remote-method="assigneeRemoteMethod" :loading="assigneeLoading" @change="updateElementTask('assignee')">
         <el-option v-for="item in selectAssigneeList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
@@ -10,7 +10,7 @@
         <el-option v-for="item in selectCandidateUserList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
-    <el-form-item label="候选分组">
+    <el-form-item label="候选角色">
       <el-select v-model="userTaskForm.candidateGroups" multiple collapse-tags @change="updateElementTask('candidateGroups')">
         <el-option v-for="item in selectCandidateGroupsList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
@@ -44,8 +44,9 @@ export default {
         followUpDate: "",
         priority: ""
       },
+      assigneeLoading: false,
       userTaskForm: {},
-      selectAssigneeList: [],
+      selectAssigneeList: [{label: '1', value: '1'},{label: '2',value: '2'}],
       selectCandidateUserList: [],
       selectCandidateGroupsList: [],
     };
@@ -60,7 +61,7 @@ export default {
     }
   },
   created() {
-    FUN_UTILS.initUserTask(this);
+    window.FUN_UTILS.initUserTask(this);
   },
   methods: {
     resetTaskForm() {
@@ -82,6 +83,19 @@ export default {
         taskAttr[key] = this.userTaskForm[key] || null;
       }
       window.bpmnInstances.modeling.updateProperties(this.bpmnElement, taskAttr);
+    }
+  },
+  assigneeRemoteMethod(query) {
+    if (query !== '') {
+      this.assigneeLoading = true;
+      setTimeout(() => {
+        this.assigneeLoading = false;
+        this.options = this.list.filter(item => {
+          return item.label.toLowerCase().indexOf(query.toLowerCase()) > -1;
+        });
+      }, 200);
+    } else {
+      this.options = [];
     }
   },
   beforeDestroy() {
