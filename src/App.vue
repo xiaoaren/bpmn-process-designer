@@ -127,7 +127,7 @@ export default {
         simulation: true,
         labelEditing: false,
         labelVisible: false,
-        prefix: "flowable",
+        prefix: "activiti",
         headerButtonSize: "mini",
         events: ["element.click", "element.contextmenu"],
         // additionalModel: []
@@ -169,8 +169,8 @@ export default {
         Log.prettyPrimary("Process Name:", rootElement.businessObject.name);
 
         let params = this.getUrlParams(window.location.href);
-        if(params && params.enBpmnStr){
-          let xmlStr = decodeURIComponent(params.enBpmnStr);
+        if(params && params.enXmlStr){
+          let xmlStr = decodeURIComponent(params.enXmlStr);
           modeler.importXML(xmlStr);
         }
         window.FUN_UTILS.bpmnModeler = modeler;
@@ -228,6 +228,10 @@ export default {
 </script>
 
 <style lang="scss">
+// 隐藏底下bpmn图标
+.bjs-powered-by,.demo-control-bar,.demo-info-bar{
+  display: none;
+}
 body {
   overflow: hidden;
   margin: 0;
