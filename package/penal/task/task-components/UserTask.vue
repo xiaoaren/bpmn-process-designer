@@ -1,17 +1,19 @@
 <template>
   <div style="margin-top: 16px">
     <el-form-item label="处理用户">
-      <el-select v-model="userTaskForm.assignee" filterable remote reserve-keyword :remote-method="assigneeRemoteMethod" :loading="assigneeLoading" @change="updateElementTask('assignee')">
+      <el-select v-model="userTaskForm.assignee" filterable reserve-keyword :loading="assigneeLoading" @change="updateElementTask('assignee')">
         <el-option v-for="item in selectAssigneeList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
     <el-form-item label="候选用户">
-      <el-select v-model="userTaskForm.candidateUsers" multiple collapse-tags @change="updateElementTask('candidateUsers')">
+      <el-select v-model="userTaskForm.candidateUsers" multiple collapse-tags filterable reserve-keyword
+        :loading="userListLoading" @change="updateElementTask('candidateUsers')">
         <el-option v-for="item in selectCandidateUserList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
     <el-form-item label="候选角色">
-      <el-select v-model="userTaskForm.candidateGroups" multiple collapse-tags @change="updateElementTask('candidateGroups')">
+      <el-select v-model="userTaskForm.candidateGroups" multiple collapse-tags filterable reserve-keyword
+        :loading="groupListLoading" @change="updateElementTask('candidateGroups')">
         <el-option v-for="item in selectCandidateGroupsList" :key="item.value" :label="item.label" :value="item.value" />
       </el-select>
     </el-form-item>
@@ -45,10 +47,15 @@ export default {
         priority: ""
       },
       assigneeLoading: false,
+      userListLoading: false,
+      groupListLoading: false,
       userTaskForm: {},
-      selectAssigneeList: [{label: '1', value: '1'},{label: '2',value: '2'}],
+      selectAssigneeList: [],
+      defSelectAssigneeList: [],
       selectCandidateUserList: [],
+      defSelectCandidateUserList: [],
       selectCandidateGroupsList: [],
+      defSelectCandidateGroupsList: [],
     };
   },
   watch: {
@@ -62,6 +69,16 @@ export default {
   },
   created() {
     window.FUN_UTILS.initUserTask(this);
+    window.FUN_UTILS.userRemoteMethod('', (list) => {
+      this.selectAssigneeList = list;
+      this.defSelectAssigneeList = list;
+      this.selectCandidateUserList = list;
+      this.defSelectCandidateUserList = list;
+    });
+    window.FUN_UTILS.roleRemoteMethod('', (list) => {
+      this.selectCandidateGroupsList = list;
+      this.defSelectCandidateGroupsList = list;
+    });
   },
   methods: {
     resetTaskForm() {
@@ -75,6 +92,39 @@ export default {
         this.$set(this.userTaskForm, key, value);
       }
     },
+    assigneeRemoteMethod(query) {
+      if (query !== '') {
+        this.assigneeLoading = true;
+        window.FUN_UTILS.userRemoteMethod({name: query, appendIds:  11}, (options) => {
+          this.assigneeLoading = false;
+          this.selectAssigneeList = options;
+        });
+      } else {
+        this.selectAssigneeList = this.defSelectAssigneeList;
+      }
+    },
+    userListRemoteMethod(query) {
+      if (query !== '') {
+        this.userListLoading = true;
+        window.FUN_UTILS.userRemoteMethod(query, (options) => {
+          this.userListLoading = false;
+          this.selectCandidateUserList = options;
+        });
+      } else {
+        this.selectCandidateUserList = this.defSelectCandidateUserList;
+      }
+    },
+    groupListRemoteMethod(query) {
+      if (query !== '') {
+        this.groupListLoading = true;
+        window.FUN_UTILS.roleRemoteMethod(query, (options) => {
+          this.groupListLoading = false;
+          this.selectCandidateGroupsList = options;
+        });
+      } else {
+        this.selectCandidateGroupsList = this.defSelectCandidateGroupsList;
+      }
+    },
     updateElementTask(key) {
       const taskAttr = Object.create(null);
       if (key === "candidateUsers" || key === "candidateGroups") {
@@ -83,19 +133,6 @@ export default {
         taskAttr[key] = this.userTaskForm[key] || null;
       }
       window.bpmnInstances.modeling.updateProperties(this.bpmnElement, taskAttr);
-    }
-  },
-  assigneeRemoteMethod(query) {
-    if (query !== '') {
-      this.assigneeLoading = true;
-      setTimeout(() => {
-        this.assigneeLoading = false;
-        this.options = this.list.filter(item => {
-          return item.label.toLowerCase().indexOf(query.toLowerCase()) > -1;
-        });
-      }, 200);
-    } else {
-      this.options = [];
     }
   },
   beforeDestroy() {
